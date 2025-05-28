@@ -39,10 +39,13 @@ Each team gets a balanced mix of DPS, Support, and Tank roles.
 Role distribution scales with team size (see code for details).
 
 ## File Structure
+
+```
 .
 ├── index.html
 ├── resources/
 │   └── index.css
+```
 
 - index.html: Main web app (HTML + JS)
 
