@@ -16,10 +16,10 @@ Responsive, user-friendly interface
 ## Getting Started
 ### 1. Clone or Download
 
-'''
-git clone https://github.com/pieterhk-444/RivalsRandom
+```
+git clone [https://github.com/pieterhk-444/RivalsRandom](https://github.com/PieterHK-444/RivalsRandom.git)
 cd team-role-assignment
-'''
+```
 
 ### 2. Open in Browser
 Just open index.html in your web browser.
