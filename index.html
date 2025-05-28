@@ -225,6 +225,15 @@
             animation: slideIn 0.5s ease-out;
         }
 
+        .empty-role {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -365,10 +374,10 @@
         }
 
         function updateAssignButton() {
-            assignBtn.disabled = players.length < 6;
+            assignBtn.disabled = players.length < 1;
             
-            if (players.length < 6) {
-                assignBtn.textContent = `🎲 Assign Teams & Roles (Need ${6 - players.length} more players)`;
+            if (players.length < 1) {
+                assignBtn.textContent = '🎲 Assign Teams & Roles (Add players first)';
             } else {
                 assignBtn.textContent = '🎲 Assign Teams & Roles';
             }
@@ -383,47 +392,97 @@
             return shuffled;
         }
 
+        function distributeRoles(playerCount) {
+            // Define role distribution based on player count
+            const roleDistributions = {
+                1: { dps: 1, support: 0, tank: 0 },
+                2: { dps: 1, support: 1, tank: 0 },
+                3: { dps: 1, support: 1, tank: 1 },
+                4: { dps: 2, support: 1, tank: 1 },
+                5: { dps: 2, support: 2, tank: 1 },
+                6: { dps: 2, support: 2, tank: 2 }
+            };
+
+            if (playerCount <= 6) {
+                return roleDistributions[playerCount];
+            }
+
+            // For more than 6 players, calculate proportional distribution
+            const baseDps = Math.ceil(playerCount * 0.4);
+            const baseSupport = Math.ceil(playerCount * 0.3);
+            const baseTank = playerCount - baseDps - baseSupport;
+
+            return {
+                dps: baseDps,
+                support: baseSupport,
+                tank: Math.max(1, baseTank)
+            };
+        }
+
         function assignTeams() {
-            if (players.length < 6) {
-                showError('Need at least 6 players to create teams');
+            if (players.length < 1) {
+                showError('Need at least 1 player to assign roles');
                 return;
             }
 
             const shuffledPlayers = shuffleArray(players);
             teams = [];
 
-            const numTeams = Math.ceil(players.length / 6);
+            // Determine number of teams based on player count
+            let numTeams;
+            if (players.length <= 6) {
+                numTeams = 1;
+            } else if (players.length <= 12) {
+                numTeams = 2;
+            } else {
+                numTeams = 3;
+            }
+
+            // Distribute players across teams
+            const playersPerTeam = Math.ceil(players.length / numTeams);
             
             for (let i = 0; i < numTeams; i++) {
-                const teamPlayers = shuffledPlayers.slice(i * 6, (i + 1) * 6);
+                const startIndex = i * playersPerTeam;
+                const endIndex = Math.min(startIndex + playersPerTeam, players.length);
+                const teamPlayers = shuffledPlayers.slice(startIndex, endIndex);
                 
-                if (teamPlayers.length < 6 && i > 0) {
-                    // If last team has fewer than 6 players, distribute them to other teams
-                    teamPlayers.forEach((player, index) => {
-                        if (teams[index % teams.length]) {
-                            teams[index % teams.length].players.push(player);
-                        }
-                    });
-                    break;
-                }
+                if (teamPlayers.length === 0) break;
 
                 const shuffledTeamPlayers = shuffleArray(teamPlayers);
+                const roleDistribution = distributeRoles(teamPlayers.length);
                 
+                let playerIndex = 0;
                 const team = {
                     name: `Team ${i + 1}`,
                     players: shuffledTeamPlayers,
                     roles: {
-                        dps: shuffledTeamPlayers.slice(0, 2),
-                        support: shuffledTeamPlayers.slice(2, 4),
-                        tank: shuffledTeamPlayers.slice(4, 6)
+                        dps: [],
+                        support: [],
+                        tank: []
                     }
                 };
+
+                // Assign DPS players
+                for (let j = 0; j < roleDistribution.dps && playerIndex < shuffledTeamPlayers.length; j++) {
+                    team.roles.dps.push(shuffledTeamPlayers[playerIndex++]);
+                }
+
+                // Assign Support players
+                for (let j = 0; j < roleDistribution.support && playerIndex < shuffledTeamPlayers.length; j++) {
+                    team.roles.support.push(shuffledTeamPlayers[playerIndex++]);
+                }
+
+                // Assign Tank players
+                for (let j = 0; j < roleDistribution.tank && playerIndex < shuffledTeamPlayers.length; j++) {
+                    team.roles.tank.push(shuffledTeamPlayers[playerIndex++]);
+                }
                 
                 teams.push(team);
             }
 
             displayTeams();
-            showInfo(`Successfully created ${teams.length} team${teams.length > 1 ? 's' : ''}!`);
+            const teamText = teams.length > 1 ? `${teams.length} teams` : '1 team';
+            showInfo(`Successfully created ${teamText} with ${players.length} players!`);
         }
 
         function displayTeams() {
@@ -433,27 +492,39 @@
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
                 
+                const dpsHtml = team.roles.dps.length > 0 
+                    ? team.roles.dps.map(player => `<div class="player">${player}</div>`).join('')
+                    : '<div class="empty-role">No DPS assigned</div>';
+
+                const supportHtml = team.roles.support.length > 0 
+                    ? team.roles.support.map(player => `<div class="player">${player}</div>`).join('')
+                    : '<div class="empty-role">No Support assigned</div>';
+
+                const tankHtml = team.roles.tank.length > 0 
+                    ? team.roles.tank.map(player => `<div class="player">${player}</div>`).join('')
+                    : '<div class="empty-role">No Tank assigned</div>';
+                
                 teamDiv.innerHTML = `
-                    <h3>${team.name}</h3>
+                    <h3>${team.name} (${team.players.length} players)</h3>
                     
                     <div class="role dps">
-                        <h4>🔫 DPS</h4>
+                        <h4>🔫 DPS (${team.roles.dps.length})</h4>
                         <div class="role-players">
-                            ${team.roles.dps.map(player => `<div class="player">${player}</div>`).join('')}
+                            ${dpsHtml}
                         </div>
                     </div>
                     
                     <div class="role support">
-                        <h4>💚 Support</h4>
+                        <h4>💚 Support (${team.roles.support.length})</h4>
                         <div class="role-players">
-                            ${team.roles.support.map(player => `<div class="player">${player}</div>`).join('')}
+                            ${supportHtml}
                         </div>
                     </div>
                     
                     <div class="role tank">
-                        <h4>🛡️ Tank</h4>
+                        <h4>🛡️ Tank (${team.roles.tank.length})</h4>
                         <div class="role-players">
-                            ${team.roles.tank.map(player => `<div class="player">${player}</div>`).join('')}
+                            ${tankHtml}
                         </div>
                     </div>
                 `;
