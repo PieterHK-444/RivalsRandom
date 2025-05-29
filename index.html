@@ -4,7 +4,274 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Role Assignment</title>
-   <link rel="stylesheet" href="resources/index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .name-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #nameInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        #nameInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        #addBtn {
+            background: #28a745;
+            color: white;
+        }
+
+        #addBtn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        #assignBtn, #assignCharBtn {
+            background: #007bff;
+            color: white;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        #assignBtn:hover, #assignCharBtn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        #assignBtn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #assignCharBtn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #randomizeBtn {
+            background: #ffc107;
+            color: #212529;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        #randomizeBtn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        #clearBtn {
+            background: #dc3545;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        #clearBtn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .names-list h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .names-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .name-tag {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .info {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .teams-container {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .team {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .team h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .role {
+            margin-bottom: 20px;
+        }
+
+        .role h4 {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .role.dps h4 {
+            background: #dc3545;
+        }
+
+        .role.support h4 {
+            background: #28a745;
+        }
+
+        .role.tank h4 {
+            background: #007bff;
+        }
+
+        .role-players {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .player {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+        }
+
+        .role.dps .player {
+            border-left-color: #dc3545;
+        }
+
+        .role.support .player {
+            border-left-color: #28a745;
+        }
+
+        .role.tank .player {
+            border-left-color: #007bff;
+        }
+
+        .player-character {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .empty-role {
+            color: #999;
+            font-style: italic;
+            padding: 10px 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .name-input-container {
+                flex-direction: column;
+            }
+            
+            .teams-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -21,7 +288,9 @@
                 <div class="names-grid" id="namesList"></div>
             </div>
             
-            <button id="assignBtn" disabled>🎲 Assign Teams & Roles</button>
+            <button id="assignBtn">🎲 Assign Teams & Roles</button>
+            <button id="assignCharBtn" disabled>🦸 Assign Characters</button>
+            <button id="randomizeBtn">🔀 Randomize Players</button>
             <button id="clearBtn">🗑️ Clear All</button>
             
             <div id="errorMessage" class="error"></div>
@@ -34,16 +303,66 @@
     <script>
         let players = [];
         let teams = [];
+        let charactersAssigned = false;
+
+        let TanksChar = [
+            "Hulk",
+            "Captain America",
+            "Doctor Strange",
+            "Groot",
+            "Magneto",
+            "Peni Parker",
+            "The Thing",
+            "Thor",
+            "Venom",
+            "Mister Fantastic"
+        ];
+
+        let DpsChar = [
+            "Black Panther",
+            "Black Widow",
+            "Hawkeye",
+            "Hela",
+            "Human Torch",
+            "Iron Fist",
+            "Iron Man",
+            "Magik",
+            "Moon Knight",
+            "Namor",
+            "Psylocke",
+            "The Punisher",
+            "Scarlet Witch",
+            "Spider-Man",
+            "Squirrel Girl",
+            "Star-Lord",
+            "Storm",
+            "Winter Soldier",
+            "Wolverine"
+        ];
+
+        let SupportChar = [
+            "Adam Warlock",
+            "Cloak and Dagger",
+            "Invisible Woman",
+            "Jeff the Land Shark",
+            "Loki",
+            "Luna Snow",
+            "Mantis",
+            "Rocket Raccoon",
+            "Emma Frost"
+        ];
 
         const nameInput = document.getElementById('nameInput');
         const addBtn = document.getElementById('addBtn');
         const assignBtn = document.getElementById('assignBtn');
+        const assignCharBtn = document.getElementById('assignCharBtn');
         const clearBtn = document.getElementById('clearBtn');
         const namesList = document.getElementById('namesList');
         const playerCount = document.getElementById('playerCount');
         const teamsContainer = document.getElementById('teamsContainer');
         const errorMessage = document.getElementById('errorMessage');
         const infoMessage = document.getElementById('infoMessage');
+        const randomizeBtn = document.getElementById('randomizeBtn');
 
         function showError(message) {
             errorMessage.textContent = message;
@@ -76,13 +395,13 @@
             players.push(name);
             nameInput.value = '';
             updatePlayersList();
-            updateAssignButton();
+            updateButtons();
         }
 
         function removePlayer(name) {
             players = players.filter(p => p !== name);
             updatePlayersList();
-            updateAssignButton();
+            updateButtons();
             clearTeams();
         }
 
@@ -101,7 +420,7 @@
             });
         }
 
-        function updateAssignButton() {
+        function updateButtons() {
             assignBtn.disabled = players.length < 1;
             
             if (players.length < 1) {
@@ -109,6 +428,9 @@
             } else {
                 assignBtn.textContent = '🎲 Assign Teams & Roles';
             }
+
+            // Enable character assignment button only if teams exist
+            assignCharBtn.disabled = teams.length === 0;
         }
 
         function shuffleArray(array) {
@@ -121,7 +443,6 @@
         }
 
         function distributeRoles(playerCount) {
-            // Define role distribution based on player count
             const roleDistributions = {
                 1: { dps: 1, support: 0, tank: 0 },
                 2: { dps: 1, support: 1, tank: 0 },
@@ -135,7 +456,6 @@
                 return roleDistributions[playerCount];
             }
 
-            // For more than 6 players, calculate proportional distribution
             const baseDps = Math.ceil(playerCount * 0.4);
             const baseSupport = Math.ceil(playerCount * 0.3);
             const baseTank = playerCount - baseDps - baseSupport;
@@ -155,8 +475,8 @@
 
             const shuffledPlayers = shuffleArray(players);
             teams = [];
+            charactersAssigned = false;
 
-            // Determine number of teams based on player count
             let numTeams;
             if (players.length <= 6) {
                 numTeams = 1;
@@ -166,7 +486,6 @@
                 numTeams = 3;
             }
 
-            // Distribute players across teams
             const playersPerTeam = Math.ceil(players.length / numTeams);
             
             for (let i = 0; i < numTeams; i++) {
@@ -190,27 +509,80 @@
                     }
                 };
 
-                // Assign DPS players
                 for (let j = 0; j < roleDistribution.dps && playerIndex < shuffledTeamPlayers.length; j++) {
-                    team.roles.dps.push(shuffledTeamPlayers[playerIndex++]);
+                    team.roles.dps.push({
+                        name: shuffledTeamPlayers[playerIndex++],
+                        character: null
+                    });
                 }
 
-                // Assign Support players
                 for (let j = 0; j < roleDistribution.support && playerIndex < shuffledTeamPlayers.length; j++) {
-                    team.roles.support.push(shuffledTeamPlayers[playerIndex++]);
+                    team.roles.support.push({
+                        name: shuffledTeamPlayers[playerIndex++],
+                        character: null
+                    });
                 }
 
-                // Assign Tank players
                 for (let j = 0; j < roleDistribution.tank && playerIndex < shuffledTeamPlayers.length; j++) {
-                    team.roles.tank.push(shuffledTeamPlayers[playerIndex++]);
+                    team.roles.tank.push({
+                        name: shuffledTeamPlayers[playerIndex++],
+                        character: null
+                    });
                 }
                 
                 teams.push(team);
             }
 
             displayTeams();
+            updateButtons();
             const teamText = teams.length > 1 ? `${teams.length} teams` : '1 team';
             showInfo(`Successfully created ${teamText} with ${players.length} players!`);
+        }
+
+        function assignCharacters() {
+            if (teams.length === 0) {
+                showError('Please assign teams and roles first');
+                return;
+            }
+
+            // Collect all players by role across all teams
+            let allDpsPlayers = [];
+            let allSupportPlayers = [];
+            let allTankPlayers = [];
+
+            teams.forEach(team => {
+                allDpsPlayers.push(...team.roles.dps);
+                allSupportPlayers.push(...team.roles.support);
+                allTankPlayers.push(...team.roles.tank);
+            });
+
+            // Shuffle character arrays
+            const shuffledDpsChars = shuffleArray(DpsChar);
+            const shuffledSupportChars = shuffleArray(SupportChar);
+            const shuffledTankChars = shuffleArray(TanksChar);
+
+            // Assign characters to players
+            allDpsPlayers.forEach((player, index) => {
+                if (index < shuffledDpsChars.length) {
+                    player.character = shuffledDpsChars[index];
+                }
+            });
+
+            allSupportPlayers.forEach((player, index) => {
+                if (index < shuffledSupportChars.length) {
+                    player.character = shuffledSupportChars[index];
+                }
+            });
+
+            allTankPlayers.forEach((player, index) => {
+                if (index < shuffledTankChars.length) {
+                    player.character = shuffledTankChars[index];
+                }
+            });
+
+            charactersAssigned = true;
+            displayTeams();
+            showInfo('Characters successfully assigned to all players!');
         }
 
         function displayTeams() {
@@ -221,15 +593,30 @@
                 teamDiv.className = 'team';
                 
                 const dpsHtml = team.roles.dps.length > 0 
-                    ? team.roles.dps.map(player => `<div class="player">${player}</div>`).join('')
+                    ? team.roles.dps.map(player => `
+                        <div class="player">
+                            ${player.name}
+                            ${player.character ? `<div class="player-character">${player.character}</div>` : ''}
+                        </div>
+                    `).join('')
                     : '<div class="empty-role">No DPS assigned</div>';
 
                 const supportHtml = team.roles.support.length > 0 
-                    ? team.roles.support.map(player => `<div class="player">${player}</div>`).join('')
+                    ? team.roles.support.map(player => `
+                        <div class="player">
+                            ${player.name}
+                            ${player.character ? `<div class="player-character">${player.character}</div>` : ''}
+                        </div>
+                    `).join('')
                     : '<div class="empty-role">No Support assigned</div>';
 
                 const tankHtml = team.roles.tank.length > 0 
-                    ? team.roles.tank.map(player => `<div class="player">${player}</div>`).join('')
+                    ? team.roles.tank.map(player => `
+                        <div class="player">
+                            ${player.name}
+                            ${player.character ? `<div class="player-character">${player.character}</div>` : ''}
+                        </div>
+                    `).join('')
                     : '<div class="empty-role">No Tank assigned</div>';
                 
                 teamDiv.innerHTML = `
@@ -264,8 +651,9 @@
         function clearAll() {
             players = [];
             teams = [];
+            charactersAssigned = false;
             updatePlayersList();
-            updateAssignButton();
+            updateButtons();
             clearTeams();
             nameInput.focus();
             showInfo('All data cleared');
@@ -273,12 +661,26 @@
 
         function clearTeams() {
             teamsContainer.innerHTML = '';
+            charactersAssigned = false;
+            updateButtons();
+        }
+
+        function randomizePlayers() {
+            if (players.length === 0) {
+                showError('No players to randomize');
+                return;
+            }
+            players = shuffleArray(players);
+            updatePlayersList();
+            showInfo('Players randomized!');
         }
 
         // Event listeners
         addBtn.addEventListener('click', addPlayer);
         assignBtn.addEventListener('click', assignTeams);
+        assignCharBtn.addEventListener('click', assignCharacters);
         clearBtn.addEventListener('click', clearAll);
+        randomizeBtn.addEventListener('click', randomizePlayers);
 
         nameInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -286,7 +688,8 @@
             }
         });
 
-        // Focus on input when page loads
+        // Initialize
+        updateButtons();
         nameInput.focus();
     </script>
 </body>
